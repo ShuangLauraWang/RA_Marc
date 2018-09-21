@@ -1,0 +1,213 @@
+
+===============================================================================
+ QNewton Version 14.0.1                                    9/20/2018   8:59 pm
+===============================================================================
+
+return code =    0
+normal convergence
+
+Value of objective function        0.476576
+
+Parameters    Estimates    Gradient
+-----------------------------------------
+P01              0.8229        0.0000
+P02              0.2759        0.0000
+
+Number of iterations        7
+Minutes to convergence     0.00008
+done with EM
+
+Probit and EM result: 
+
+0.8228946 0.8228902 
+0.2759409 0.2759438 
+____________________
+
+===============================================================================
+ QNewton Version 14.0.1                                    9/20/2018   8:59 pm
+===============================================================================
+
+return code =    0
+normal convergence
+
+Value of objective function        0.531578
+
+Parameters    Estimates    Gradient
+-----------------------------------------
+P01              0.9942        0.0000
+P02              1.0122        0.0000
+
+Number of iterations       10
+Minutes to convergence     0.00031
+done with EM
+
+0.9941869 0.9948176 
+1.012237 1.012753 
+
+===============================================================================
+ QNewton Version 14.0.1                                    9/20/2018   8:59 pm
+===============================================================================
+
+return code =    0
+normal convergence
+
+Value of objective function        0.531128
+
+Parameters    Estimates    Gradient
+-----------------------------------------
+P01              0.9998        0.0000
+P02              1.0236        0.0000
+
+Number of iterations       10
+Minutes to convergence     0.00035
+done with EM
+
+0.9998252 1.000585 
+1.023640 1.023938 
+
+===============================================================================
+ QNewton Version 14.0.1                                    9/20/2018   8:59 pm
+===============================================================================
+
+return code =    0
+normal convergence
+
+Value of objective function        0.532442
+
+Parameters    Estimates    Gradient
+-----------------------------------------
+P01              1.0027        0.0000
+P02              0.9946        0.0000
+
+Number of iterations       10
+Minutes to convergence     0.00027
+done with EM
+
+1.002659 1.005407 
+0.9945897 0.9982272 
+
+===============================================================================
+ QNewton Version 14.0.1                                    9/20/2018   8:59 pm
+===============================================================================
+
+return code =    0
+normal convergence
+
+Value of objective function        0.531774
+
+Parameters    Estimates    Gradient
+-----------------------------------------
+P01              1.0279        0.0000
+P02              0.9777        0.0000
+
+Number of iterations       10
+Minutes to convergence     0.00024
+done with EM
+
+1.027889 1.031337 
+0.9777408 0.9817216 
+
+===============================================================================
+ QNewton Version 14.0.1                                    9/20/2018   8:59 pm
+===============================================================================
+
+return code =    0
+normal convergence
+
+Value of objective function        0.519705
+
+Parameters    Estimates    Gradient
+-----------------------------------------
+P01              1.0517        0.0000
+P02              1.0805        0.0000
+
+Number of iterations       10
+Minutes to convergence     0.00027
+done with EM
+
+1.051708 1.046936 
+1.080470 1.071505 
+
+===============================================================================
+ QNewton Version 14.0.1                                    9/20/2018   8:59 pm
+===============================================================================
+
+return code =    0
+normal convergence
+
+Value of objective function        0.533623
+
+Parameters    Estimates    Gradient
+-----------------------------------------
+P01              0.9883        0.0000
+P02              1.0371        0.0000
+
+Number of iterations       10
+Minutes to convergence     0.00023
+done with EM
+
+0.9882955 0.9866772 
+1.037060 1.030612 
+
+===============================================================================
+ QNewton Version 14.0.1                                    9/20/2018   8:59 pm
+===============================================================================
+
+return code =    0
+normal convergence
+
+Value of objective function        0.534303
+
+Parameters    Estimates    Gradient
+-----------------------------------------
+P01              0.9947        0.0000
+P02              0.9826        0.0000
+
+Number of iterations       10
+Minutes to convergence     0.00063
+done with EM
+
+0.9947105 0.9956091 
+0.9825740 0.9843801 
+
+===============================================================================
+ QNewton Version 14.0.1                                    9/20/2018   8:59 pm
+===============================================================================
+
+return code =    0
+normal convergence
+
+Value of objective function        0.533847
+
+Parameters    Estimates    Gradient
+-----------------------------------------
+P01              0.9812        0.0000
+P02              1.0198        0.0000
+
+Number of iterations       10
+Minutes to convergence     0.00034
+done with EM
+
+0.9811542 0.9805149 
+1.019797 1.019330 
+
+===============================================================================
+ QNewton Version 14.0.1                                    9/20/2018   8:59 pm
+===============================================================================
+
+return code =    0
+normal convergence
+
+Value of objective function        0.530254
+
+Parameters    Estimates    Gradient
+-----------------------------------------
+P01              1.0286        0.0000
+P02              0.9731        0.0000
+
+Number of iterations       10
+Minutes to convergence     0.00060
+done with EM
+
+1.028613 1.029763 
+0.9731354 0.9777247 

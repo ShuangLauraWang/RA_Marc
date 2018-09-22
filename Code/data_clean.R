@@ -164,9 +164,13 @@ x <- seq(0, 5e5, length=1000)
 which.min <- which(output.constr[1, ] == min(output.constr[1, ], na.rm = T))
 which.max <- which(output.constr[1, ] == max(output.constr[1, ], na.rm = T))
 
+which.min.var <- which(output.constr[2, ] == min(output.constr[2, ], na.rm = T))
+which.max.var <- which(output.constr[2, ] == max(output.constr[2, ], na.rm = T))
+
+
 # California Income Distribution
 plot(density(income.sample, from = 0 , to = 5e5), 
-     main = "Califronia Income Distribution",
+     main = "California Income Distribution",
      lwd = 2,
      ylim = c(0, 2e-5),
      xlab = "Income")
@@ -180,7 +184,15 @@ lines(x,
       dlnorm(x, output.constr[1, which.max], output.constr[2, which.max]), 
       col = "orange", 
       lwd = 2)
+lines(x, 
+      dlnorm(x, output.constr[1, which.min.var], output.constr[2, which.min.var]), 
+      col = "blue", 
+      lwd = 2)
+lines(x, 
+      dlnorm(x, output.constr[1, which.max.var], output.constr[2, which.max.var]), 
+      col = "red", 
+      lwd = 2)
 legend("topright", 
-       legend = c("Total", "Min", "Max"), 
-       col = c("black", "lightblue", "orange"),
+       legend = c("Total", "Min.mean", "Max.mean", "Min.var", "Max.var"), 
+       col = c("black", "lightblue", "orange", "blue", "red"),
        lwd = 2)

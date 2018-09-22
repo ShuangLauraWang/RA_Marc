@@ -156,32 +156,39 @@ rincome <- function(N){
 
 # eliminate incompete cases (NA's)
 data <- data[complete.cases(t(output.constr)),]
-output.constr <- output.constr[ , complete.cases(t(output.constr))]
+
+# calculate the income mean and variance:
+# E[X] = exp(mu + sigma^2/2)
+# SD[X] = exp( u + sigma^2/2) * sqrt(exp(sigma^2) - 1)
+mu <- output.constr[1, complete.cases(t(output.constr))]
+sigma <- output.constr[2, complete.cases(t(output.constr))]
+income.dist <- rbind(mean = exp(mu + sigma^2/2),
+                     sd = exp(mu + sigma^2/2) * sqrt(exp(sigma^2) - 1))
+
+
+which.min.mean <- which(income.dist["mean", ] == min(income.dist["mean", ], na.rm = T))
+which.max.mean <- which(income.dist["mean", ] == max(income.dist["mean", ], na.rm = T))
+
+which.min.var <- which(income.dist["sd", ] == min(income.dist["sd", ], na.rm = T))
+which.max.var <- which(income.dist["sd", ] == max(income.dist["sd", ], na.rm = T))
 
 income.sample <- rincome(100000)
-
 x <- seq(0, 5e5, length=1000)
-which.min <- which(output.constr[1, ] == min(output.constr[1, ], na.rm = T))
-which.max <- which(output.constr[1, ] == max(output.constr[1, ], na.rm = T))
-
-which.min.var <- which(output.constr[2, ] == min(output.constr[2, ], na.rm = T))
-which.max.var <- which(output.constr[2, ] == max(output.constr[2, ], na.rm = T))
-
 
 # California Income Distribution
-plot(density(income.sample, from = 0 , to = 5e5), 
+plot(density(income.sample, from = 0 , to = 2.5e5), 
      main = "California Income Distribution",
      lwd = 2,
-     ylim = c(0, 2e-5),
+     ylim = c(0, 1.5e-4),
      xlab = "Income")
 # Income Distribution of the tract with the lowest mean
 lines(x, 
-      dlnorm(x, output.constr[1, which.min], output.constr[2, which.min]), 
+      dlnorm(x, output.constr[1, which.min.mean], output.constr[2, which.min.mean]), 
       col = "lightblue", 
       lwd = 2)
 # Income Distribution of the tract with the highes mean
 lines(x, 
-      dlnorm(x, output.constr[1, which.max], output.constr[2, which.max]), 
+      dlnorm(x, output.constr[1, which.max.mean], output.constr[2, which.max.mean]), 
       col = "orange", 
       lwd = 2)
 lines(x, 
@@ -193,6 +200,6 @@ lines(x,
       col = "red", 
       lwd = 2)
 legend("topright", 
-       legend = c("Total", "Min.mean", "Max.mean", "Min.var", "Max.var"), 
+       legend = c("Total", "Min.Mean", "Max.Mean", "Min.Var", "Max.Var"), 
        col = c("black", "lightblue", "orange", "blue", "red"),
        lwd = 2)

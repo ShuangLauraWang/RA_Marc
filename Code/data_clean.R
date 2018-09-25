@@ -159,7 +159,7 @@ data <- data[complete.cases(t(output.constr)),]
 
 # calculate the income mean and variance:
 # E[X] = exp(mu + sigma^2/2)
-# SD[X] = exp( u + sigma^2/2) * sqrt(exp(sigma^2) - 1)
+# SD[X] = exp(mu + sigma^2/2) * sqrt(exp(sigma^2) - 1)
 mu <- output.constr[1, complete.cases(t(output.constr))]
 sigma <- output.constr[2, complete.cases(t(output.constr))]
 income.dist <- rbind(mean = exp(mu + sigma^2/2),

@@ -22,28 +22,47 @@ setwd("~/OneDrive - Boston University/RA_Marc/Data")
 
 data.quintile <- read.csv(file = "ACS_16_5YR_B19080/ACS_16_5YR_B19080_with_ann.csv", header = TRUE, sep = ",")
 data.population <- read.csv(file = "ACS_16_5YR_B10063/ACS_16_5YR_B10063_with_ann.csv", header = TRUE, sep = ",")
+data.quintile.mean <- read.csv(file = "ACS_16_5YR_B19081 mean income by quintile/ACS_16_5YR_B19081_with_ann.csv", header = TRUE, sep = ",")
 
 #delete the description row
 data.quintile <- data.quintile[-1, ] 
 data.population <- data.population[-1, ] 
+data.quintile.mean <- data.quintile.mean[-1, ] 
+
 
 
 keep.quintile <- c("GEO.id", "GEO.id2", "GEO.display.label", "HD01_VD02", 
                    "HD01_VD03", "HD01_VD04", "HD01_VD05", "HD01_VD06")
-
 data.quintile <- data.quintile[, keep.quintile]
 colnames(data.quintile) <- c("GEO_id", "GEO_id2", "Geography", "Quintile1", 
                              "Quintile2", "Quintile3", "Quintile4", "Top5")
+#data.quintile<- data.quintile[apply(data.quintile, 1, 
+#                                    FUN = function(x) sum(x %in% c("-", "**")) < 5), ] 
+
+
 
 keep.population <- c("GEO.id", "GEO.id2", "GEO.display.label", "HD01_VD01")
-
 data.population <- data.population[, keep.population]
 colnames(data.population) <- c("GEO_id", "GEO_id2", "Geography", "Population")
 
-data <- merge(data.quintile, data.population, by = c("GEO_id", "GEO_id2", "Geography"))
+# Ignore the Top 5 percent column for a while
+keep.quintile.mean <- c("GEO.id", "GEO.id2", "GEO.display.label", "HD01_VD02", 
+                        "HD01_VD03", "HD01_VD04", "HD01_VD05", "HD01_VD06")
+data.quintile.mean <- data.quintile.mean[, keep.quintile.mean]
+colnames(data.quintile.mean) <- c("GEO_id", "GEO_id2", "Geography",  
+                                  "Quintile1_Mean", "Quintile2_Mean", "Quintile3_Mean", 
+                                  "Quintile4_Mean", "Quintile5_Mean")
 
-# delete tracts without observed quantiles (84 tracts deleted)
-data<- data[apply(data, 1, FUN = function(x) sum(x %in% c("-", "**")) < 5), ] 
+
+data.temp <- merge(data.quintile, data.quintile.mean, 
+                   by = c("GEO_id", "GEO_id2", "Geography"), 
+                   all.x = T)
+data <- merge(data.temp, data.population, 
+              by = c("GEO_id", "GEO_id2", "Geography"),
+              all.x = T)
+
+#delete tracts without observed quantiles (84 tracts deleted)
+data<- data[apply(data, 1, FUN = function(x) sum(x %in% c("-", "**")) < 10), ] 
 
 row.names(data) <- 1 : nrow(data)
 
@@ -59,8 +78,20 @@ top.coded <- apply(as.matrix(data), 1, function(x){sum(x %in% c("2,500-", "250,0
 
 
 # functions
+# 
 
-obj.fn <- function(params, q){
+cond.ex <- function(params, lc = 0, uc = Inf){
+        
+        mu <- params[1]
+        sigma <- params[2]
+        
+        ex <- exp(mu + sigma^2/2)
+        
+        ex * (pnorm(sigma - (log(lc) - mu)/sigma) - pnorm(sigma - (log(uc) - mu)/sigma))/
+               (pnorm((log(uc) - mu)/sigma) - pnorm((log(lc) - mu)/sigma))
+}
+
+obj.fn <- function(params, obs){
         # This function is the objective function for log normal distribution fit
         # 
         # args: (1)params: meanlog & sdlog of a log normal
@@ -72,11 +103,21 @@ obj.fn <- function(params, q){
         mu <- params[1]
         sigma <- params[2]
         
-        p <- p[!is.na(q)]
-        q <- q[!is.na(q)]
+        q.obs <- obs[1 : 5]
+        mean.obs <- obs[6 : 10]
+
+        lc <- qlnorm(c(0, p[1 : 4]), mu, sigma)
+        uc <- qlnorm(c(p[1 : 4], 1), mu, sigma)
+        mean.true <- mapply(cond.ex, lc = lc, uc = uc, MoreArgs = list(params = params))
         
-        diff <- q - qlnorm(p, mu, sigma)
+        q.true <- qlnorm(p, mu, sigma)
         
+        weights <- sqrt(p * (1 - p) / dlnorm(q.true)^2)
+
+        #weights <- rep(1, length(p))
+        diff <- c(((q.obs - q.true)/weights)[!is.na(q.obs)], 
+                  ((mean.obs - mean.true)/weights)[!is.na(mean.obs)])
+
         obj.value <- sum(diff^2)
         
         return(obj.value)
@@ -127,10 +168,59 @@ optim.fit.constr <- function(x){
         }
 }
 
+
+optim.fit.constr <- function(x){
+        
+        # This function distinguishes two cases:
+        # (1) 2 or less quantiles are observed, bad empirical fits, return NA's
+        # (2) more than 2 quantiles are observed, estimate with auglag(), which 
+        # allows inequality constraints.
+        # 
+        # args: (1)x: each row of data
+        #       
+        # output: optimal logmean and sdmeand of a log normal distribution
+        
+        q.obs <- x[1 : 5]
+        
+        lb <- max(which(q.obs == "2,500-"))
+        ub <- min(which(q.obs == "250,000+"))
+        
+        x <- as.numeric(x)
+        
+        if (sum(!is.na(x)) < 2)
+                return(c(NA, NA))
+        else{
+                hin <- function(params, obs){
+                                # inequality constrainsts
+                                
+                                mu <- params[1]
+                                sigma <- params[2]
+                                
+                                h <- rep(NA,1)
+                                
+                                i <- 1
+                                
+                                if (lb > -Inf){
+                                        h[i] <- 2500 - qlnorm(p[lb], mu, sigma)
+                                        i <- i + 1
+                                }
+                                if (ub < Inf)        
+                                        h[i] <- qlnorm(p[ub], mu, sigma) - 250000
+                        }
+                        
+                return(auglag(par = c(0, 1), fn = obj.fn, hin = hin, obs = x, 
+                              control.outer = list(trace = F))$par)
+        }            
+        
+}
+
+
 # cut values for quantiles
 p <- c(seq(from = 0.2, to = 0.8, by = 0.2), 0.95)
 
-output.constr <- apply(data[, c("Quintile1", "Quintile2", "Quintile3", "Quintile4", "Top5")], 1, FUN = optim.fit.constr)
+
+
+output.constr <- apply(data[1, 4 : 13], 1, FUN = optim.fit.constr)
 
 # output summary
 apply(output.constr, 1, summary)

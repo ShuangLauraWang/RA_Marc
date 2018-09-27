@@ -201,21 +201,21 @@ rincome <- function(N){
 
 # eliminate incompete cases (NA's)
 data <- data[complete.cases(t(output.constr)),]
-
+output.constr <- output.constr[, complete.cases(t(output.constr))]
 # calculate the income mean and variance:
 # E[X] = exp(mu + sigma^2/2)
 # SD[X] = exp(mu + sigma^2/2) * sqrt(exp(sigma^2) - 1)
-mu <- output.constr[1, complete.cases(t(output.constr))]
-sigma <- output.constr[2, complete.cases(t(output.constr))]
+mu <- output.constr[1, ]
+sigma <- output.constr[2, ]
 income.dist <- rbind(mean = exp(mu + sigma^2/2),
                      sd = exp(mu + sigma^2/2) * sqrt(exp(sigma^2) - 1))
 
 
-which.min.mean <- which(income.dist["mean", ] == min(income.dist["mean", ], na.rm = T))
-which.max.mean <- which(income.dist["mean", ] == max(income.dist["mean", ], na.rm = T))
+which.min.mean <- which(income.dist["mean", ] == min(income.dist["mean", ]))
+which.max.mean <- which(income.dist["mean", ] == max(income.dist["mean", ]))
 
-which.min.var <- which(income.dist["sd", ] == min(income.dist["sd", ], na.rm = T))
-which.max.var <- which(income.dist["sd", ] == max(income.dist["sd", ], na.rm = T))
+which.min.var <- which(income.dist["sd", ] == min(income.dist["sd", ]))
+which.max.var <- which(income.dist["sd", ] == max(income.dist["sd", ]))
 
 income.sample <- rincome(100000)
 x <- seq(0, 5e5, length=1000)
@@ -224,7 +224,7 @@ x <- seq(0, 5e5, length=1000)
 plot(density(income.sample, from = 0 , to = 2.5e5), 
      main = "California Income Distribution",
      lwd = 2,
-     ylim = c(0, 1.5e-4),
+     ylim = c(0, 1e-4),
      xlab = "Income")
 # Income Distribution of the tract with the lowest mean
 lines(x, 

@@ -29,29 +29,26 @@ data.quintile <- data.quintile[-1, ]
 data.population <- data.population[-1, ] 
 data.quintile.mean <- data.quintile.mean[-1, ] 
 
-
-
-keep.quintile <- c("GEO.id", "GEO.id2", "GEO.display.label", "HD01_VD02", 
-                   "HD01_VD03", "HD01_VD04", "HD01_VD05", "HD01_VD06")
-data.quintile <- data.quintile[, keep.quintile]
-colnames(data.quintile) <- c("GEO_id", "GEO_id2", "Geography", "Quintile1", 
-                             "Quintile2", "Quintile3", "Quintile4", "Top5")
-#data.quintile<- data.quintile[apply(data.quintile, 1, 
-#                                    FUN = function(x) sum(x %in% c("-", "**")) < 5), ] 
-
-
+colnames(data.quintile) <- c("GEO_id", "GEO_id2", "Geography", 
+                             "Quintile1", "Quintile1_MoE",
+                             "Quintile2", "Quintile2_MoE",
+                             "Quintile3", "Quintile3_MoE",
+                             "Quintile4", "Quintile4_MoE",
+                             "Top5", "Top5_MoE")
 
 keep.population <- c("GEO.id", "GEO.id2", "GEO.display.label", "HD01_VD01")
 data.population <- data.population[, keep.population]
 colnames(data.population) <- c("GEO_id", "GEO_id2", "Geography", "Population")
 
-# Ignore the Top 5 percent column for a while
-keep.quintile.mean <- c("GEO.id", "GEO.id2", "GEO.display.label", "HD01_VD02", 
-                        "HD01_VD03", "HD01_VD04", "HD01_VD05", "HD01_VD06")
-data.quintile.mean <- data.quintile.mean[, keep.quintile.mean]
+
+
 colnames(data.quintile.mean) <- c("GEO_id", "GEO_id2", "Geography",  
-                                  "Quintile1_Mean", "Quintile2_Mean", "Quintile3_Mean", 
-                                  "Quintile4_Mean", "Quintile5_Mean")
+                                  "Quintile1_Mean", "Quintile1_Mean_MoE",
+                                  "Quintile2_Mean", "Quintile2_Mean_MoE",
+                                  "Quintile3_Mean", "Quintile3_Mean_MoE",
+                                  "Quintile4_Mean", "Quintile4_Mean_MoE",
+                                  "Quintile5_Mean", "Quintile5_Mean_MoE",
+                                  "Top5_Mean", "Top5_Mean_MoE")
 
 
 data.temp <- merge(data.quintile, data.quintile.mean, 

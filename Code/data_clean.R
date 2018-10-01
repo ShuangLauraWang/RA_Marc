@@ -28,12 +28,20 @@ data.quintile <- data.quintile[-1, ]
 data.population <- data.population[-1, ] 
 
 
-keep.quintile <- c("GEO.id", "GEO.id2", "GEO.display.label", "HD01_VD02", 
-                   "HD01_VD03", "HD01_VD04", "HD01_VD05", "HD01_VD06")
+# keep.quintile <- c("GEO.id", "GEO.id2", "GEO.display.label", "HD01_VD02", 
+#                    "HD01_VD03", "HD01_VD04", "HD01_VD05", "HD01_VD06")
+# 
+# data.quintile <- data.quintile[, keep.quintile]
+# colnames(data.quintile) <- c("GEO_id", "GEO_id2", "Geography", "Quintile1", 
+#                              "Quintile2", "Quintile3", "Quintile4", "Top5")
+#                              
 
-data.quintile <- data.quintile[, keep.quintile]
-colnames(data.quintile) <- c("GEO_id", "GEO_id2", "Geography", "Quintile1", 
-                             "Quintile2", "Quintile3", "Quintile4", "Top5")
+colnames(data.quintile) <- c("GEO_id", "GEO_id2", "Geography", 
+                             "Quintile1", "Quintile1_MoE",
+                             "Quintile2", "Quintile2_MoE",
+                             "Quintile3", "Quintile3_MoE",
+                             "Quintile4", "Quintile4_MoE",
+                             "Top5", "Top5_MoE")                            
 
 keep.population <- c("GEO.id", "GEO.id2", "GEO.display.label", "HD01_VD01")
 
@@ -43,7 +51,8 @@ colnames(data.population) <- c("GEO_id", "GEO_id2", "Geography", "Population")
 data <- merge(data.quintile, data.population, by = c("GEO_id", "GEO_id2", "Geography"))
 
 # delete tracts without observed quantiles (84 tracts deleted)
-data<- data[apply(data, 1, FUN = function(x) sum(x %in% c("-", "**")) < 5), ] 
+missing <- apply(data, 1, FUN = function(x) sum(x %in% c("-", "**", "***")))
+data<- data[missing < 10, ] 
 
 row.names(data) <- 1 : nrow(data)
 
@@ -60,7 +69,7 @@ top.coded <- apply(as.matrix(data), 1, function(x){sum(x %in% c("2,500-", "250,0
 
 # functions
 
-obj.fn <- function(params, q){
+obj.fn <- function(params, obs, weight = T){
         # This function is the objective function for log normal distribution fit
         # 
         # args: (1)params: meanlog & sdlog of a log normal
@@ -72,17 +81,24 @@ obj.fn <- function(params, q){
         mu <- params[1]
         sigma <- params[2]
         
+        q <- obs[seq(1, length(obs) - 1, by = 2)]
+        moe <- obs[seq(2, length(obs) - 1, by = 2)]
+        n <- obs[length(obs)]
+        
         p <- p[!is.na(q)]
+        moe <- moe[!is.na(q)]
         q <- q[!is.na(q)]
         
-        diff <- q - qlnorm(p, mu, sigma)
+
+        
+        diff <- (q - qlnorm(p, mu, sigma))/(moe * 1.96)^weight 
         
         obj.value <- sum(diff^2)
         
         return(obj.value)
 }
 
-optim.fit.constr <- function(x){
+optim.fit.constr <- function(x, weight){
         
         # This function distinguishes two cases:
         # (1) 2 or less quantiles are observed, bad empirical fits, return NA's
@@ -93,8 +109,10 @@ optim.fit.constr <- function(x){
         #       
         # output: optimal logmean and sdmeand of a log normal distribution
         
-        lb <- max(which(x == "2,500-"))
-        ub <- min(which(x == "250,000+"))
+        q <- x[seq(1, length(x) - 1, by = 2)]
+        
+        lb <- max(which(q == "2,500-"))
+        ub <- min(which(q == "250,000+"))
         
         x <- as.numeric(x)
         
@@ -102,7 +120,7 @@ optim.fit.constr <- function(x){
                 return(c(NA, NA))
         else{
                 
-                hin <- function(params, q){
+                hin <- function(params, obs, weight){
                         # inequality constrainsts
                         
                         mu <- params[1]
@@ -121,7 +139,7 @@ optim.fit.constr <- function(x){
                 }
                 
                 return(auglag(par = c(0, 1), 
-                              fn = obj.fn, hin = hin, q = x, 
+                              fn = obj.fn, hin = hin, obs = x, weight = weight,
                               control.outer = list(trace = F))$par)
                 
         }
@@ -130,7 +148,7 @@ optim.fit.constr <- function(x){
 # cut values for quantiles
 p <- c(seq(from = 0.2, to = 0.8, by = 0.2), 0.95)
 
-output.constr <- apply(data[, c("Quintile1", "Quintile2", "Quintile3", "Quintile4", "Top5")], 1, FUN = optim.fit.constr)
+output.constr <- apply(data[99, -(1 : 3)], 1, FUN = optim.fit.constr, weight = F)
 
 # output summary
 apply(output.constr, 1, summary)

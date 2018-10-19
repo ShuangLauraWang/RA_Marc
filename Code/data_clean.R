@@ -143,6 +143,10 @@ output.constr <- apply(data[, -(1 : 3)], 1,
 # output summary
 apply(output.constr, 1, summary)
 
+est.income.dist <- data.frame(TRACT = data$GEO_id2, 
+                              meanlog = output.constr[1, ],
+                              sdlog = output.constr[2, ])
+
 
 ##########      Construct California Income Distribution      ##################
 

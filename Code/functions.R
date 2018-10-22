@@ -4,6 +4,7 @@ GetData <- function(wd, year){
         data <- numeric(0)
         
         for(i in year){
+                
                 pwd <- paste0(wd,"DMV/MMMyr_Tract_", i, ".csv")
                 
                 data.add <- read.csv(file = pwd, header = TRUE, sep = ",")
@@ -18,14 +19,23 @@ GetData <- function(wd, year){
 
 
 
-SalesVolumnSum <- function(x, by, data){
+SalesSum <- function(x, group.by, data, order.by = c("DMV_YEAR")){
         
         x <- paste0("cbind(", paste0(x, collapse = ", "), ")")
-        by <- paste0(by, collapse = " + ")
-        formula <- as.formula(paste(x, " ~ ", by))
+        group.by <- paste0(group.by, collapse = " + ")
+        formula <- as.formula(paste(x, " ~ ", group.by))
         smr.df <- aggregate(formula, data = data, FUN = sum)
-        smr.df[order(smr.df$DMV_YEAR, -smr.df$Transaction_count),]
+        smr.df
+}
+
+CumMKTShare <- function(data, order.by = c("DMV_YEAR")){
         
+        data <- data %>% arrange_(.dots = order.by)
+        data$mkt.share <-  ave(data$Transaction_count, data$DMV_YEAR, 
+                                 FUN = function(x) x/sum(x))
+        data$cum.mkt.share <- ave(data$Transaction_count, data$DMV_YEAR, 
+                                    FUN = function(x)cumsum(x)/sum(x))
+        data
 }
 
 obj.fn <- function(params, x, data){

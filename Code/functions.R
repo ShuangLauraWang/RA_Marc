@@ -32,9 +32,9 @@ CumMKTShare <- function(data, order.by = c("DMV_YEAR")){
         
         data <- data %>% arrange_(.dots = order.by)
         data$mkt.share <-  ave(data$Transaction_count, data$DMV_YEAR, 
-                                 FUN = function(x) x/sum(x))
+                                 FUN = function(x) x/sum(x) * 100)
         data$cum.mkt.share <- ave(data$Transaction_count, data$DMV_YEAR, 
-                                    FUN = function(x)cumsum(x)/sum(x))
+                                    FUN = function(x) cumsum(x)/sum(x)*100)
         data
 }
 

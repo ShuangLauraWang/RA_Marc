@@ -76,7 +76,6 @@ top.coded <- apply(as.matrix(data), 1, function(x){sum(x %in% c("2,500-", "250,0
 
 
 # functions
-# 
 
 cond.ex <- function(params, lc = 0, uc = Inf){
         
@@ -94,7 +93,7 @@ obj.fn <- function(params, x, weight){
         # 
         # args: (1)params: meanlog & sdlog of a log normal
         #       (2)q: quantiles to be fitted
-        #       (3)weights: weights for each quantile
+        #       (3)weight: weights for each quantile
         #       
         # output:  sum of squares of the differences between the 
         #          observed quantiles and the predicted ones     
@@ -131,13 +130,11 @@ obj.fn <- function(params, x, weight){
 # cut values for quantiles
 p <- c(seq(from = 0.2, to = 0.8, by = 0.2), 0.95)
 
-
-
 output.constr <- apply(data[, -(1 : 3)], 1, 
                        FUN = function(x){
                                x <- as.numeric(x)
                                optim(par = c(10, 1), fn = obj.fn, x = x, 
-                                     weight = F)$par
+                                     weight = T)$par
                        })
 
 # output summary
@@ -179,6 +176,15 @@ which.max.mean <- which(income.dist["mean", ] == max(income.dist["mean", ]))
 
 which.min.var <- which(income.dist["sd", ] == min(income.dist["sd", ]))
 which.max.var <- which(income.dist["sd", ] == max(income.dist["sd", ]))
+
+m.cases <- c(which.min.mean, which.max.mean, 
+             which.min.var, which.max.var)
+list.m <- data.frame("Tract ID" =  data$GEO_id2[m.cases], 
+                     "Mean of Annual Income" = income.dist["mean", m.cases],
+                     "SD of Annual Income" = income.dist["sd", m.cases])
+
+rownames(list.m) <- c("Mininum Mean", "Maximum Mean", "Minimum SD", "Maximum SD")
+xtable(list.m, caption = "Tracts with Mininum and Maximum Income Mean & SD")
 
 income.sample <- rincome(100000)
 x <- seq(0, 5e5, length=1000)
